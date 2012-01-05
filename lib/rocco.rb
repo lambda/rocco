@@ -73,13 +73,25 @@ end
 #
 # * `:stylesheet`, which specifies the css stylesheet to use for each
 #   rendered template.  _Defaults to `http://jashkenas.github.com/docco/resources/docco.css`
-#   (the original docco stylesheet)
+#   (the original docco stylesheet)._
+#
+# * `:encoding`: specifies the encoding that input files are written in.
+#   _Defaults to `UTF-8`_.
 class Rocco
   VERSION = '0.8.2'
 
   def initialize(filename, sources=[], options={}, &block)
     @file       = filename
     @sources    = sources
+
+    defaults = {
+      :language      => 'ruby',
+      :comment_chars => '#',
+      :template_file => nil,
+      :stylesheet => 'http://jashkenas.github.com/docco/resources/docco.css',
+      :encoding => 'UTF-8'
+    }
+    @options = defaults.merge(options)
 
     # When `block` is given, it must read the contents of the file using
     # whatever means necessary and return it as a string. With no `block`,
@@ -88,16 +100,19 @@ class Rocco
       if block_given?
         yield
       else
-        File.read(filename)
+        # Ensure that regardless of what the encoding of the input file is,
+        # we use UTF-8 internally, as Markdown and Pygments expect UTF-8
+        # input.  This works differently in Ruby 1.8 and Ruby 1.9, which
+        # are distinguished by checking if `IO#external_encoding` exists.
+        if IO.method_defined?("external_encoding")
+          File.read(filename, :external_encoding => @options[:encoding],
+                    :internal_encoding => "UTF-8")
+        else
+          require 'iconv'
+          data = File.read(filename)
+          Iconv.conv("UTF-8", @options[:encoding], data)
+        end
       end
-
-    defaults = {
-      :language      => 'ruby',
-      :comment_chars => '#',
-      :template_file => nil,
-      :stylesheet => 'http://jashkenas.github.com/docco/resources/docco.css'
-    }
-    @options = defaults.merge(options)
 
     # If we detect a language
     if detect_language() != "text"
