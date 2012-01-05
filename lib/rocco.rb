@@ -31,16 +31,9 @@
 
 #### Prerequisites
 
-# We'll need a Markdown library. Try to load one if not already established.
-if !defined?(Markdown)
-  libs = %w[redcarpet/compat rdiscount bluecloth]
-  begin
-    require libs.shift
-  rescue LoadError => boom
-    retry if libs.any?
-    raise
-  end
-end
+# We use [RDiscount](https://github.com/rtomayko/rdiscount) for Markdown
+# processing.
+require 'rdiscount'
 
 # We use [{{ mustache }}](http://defunkt.github.com/mustache/) for
 # HTML templating.

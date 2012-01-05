@@ -86,7 +86,7 @@ class RoccoIssueTests < Test::Unit::TestCase
     r = roccoize( "filename.rb", "def codeblock\nend\n" )
     assert_equal 1, r.sections.length
     assert_equal 2, r.sections[ 0 ].length
-    assert_equal "", r.sections[ 0 ][ 0 ]
+    assert_match /\s*/, r.sections[ 0 ][ 0 ]
     assert_equal "<span class=\"k\">def</span> <span class=\"nf\">codeblock</span>\n<span class=\"k\">end</span>", r.sections[ 0 ][ 1 ]
   end
 end
